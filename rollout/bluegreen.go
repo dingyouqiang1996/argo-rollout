@@ -20,6 +20,10 @@ func (c *rolloutContext) rolloutBlueGreen() error {
 	if err != nil {
 		return err
 	}
+	additionalPreviewSvcs, additionalActiveSvcs, err := c.getAdditionalPreviewAndActiveServices()
+	if err != nil {
+		return err
+	}
 	c.newRS, err = c.getAllReplicaSetsAndSyncRevision(true)
 	if err != nil {
 		return err
@@ -29,6 +33,13 @@ func (c *rolloutContext) rolloutBlueGreen() error {
 	err = c.reconcilePreviewService(previewSvc)
 	if err != nil {
 		return err
+	}
+
+	for _, svc := range additionalPreviewSvcs {
+		err = c.reconcilePreviewService(svc)
+		if err != nil {
+			return err
+		}
 	}
 
 	if replicasetutil.CheckPodSpecChange(c.rollout, c.newRS) {
@@ -50,6 +61,13 @@ func (c *rolloutContext) rolloutBlueGreen() error {
 	err = c.reconcileActiveService(activeSvc)
 	if err != nil {
 		return err
+	}
+
+	for _, svc := range additionalActiveSvcs {
+		err = c.reconcileActiveService(svc)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = c.awsVerifyTargetGroups(activeSvc)
