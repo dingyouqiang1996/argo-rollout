@@ -2871,6 +2871,31 @@ export interface GithubComArgoprojArgoRolloutsPkgApisRolloutsV1alpha1TemplateSer
      * @memberof GithubComArgoprojArgoRolloutsPkgApisRolloutsV1alpha1TemplateService
      */
     name?: string;
+    /**
+     * 
+     * @type {Array<GithubComArgoprojArgoRolloutsPkgApisRolloutsV1alpha1TemplateServicePortMapping>}
+     * @memberof GithubComArgoprojArgoRolloutsPkgApisRolloutsV1alpha1TemplateService
+     */
+    portMappings?: Array<GithubComArgoprojArgoRolloutsPkgApisRolloutsV1alpha1TemplateServicePortMapping>;
+}
+/**
+ * 
+ * @export
+ * @interface GithubComArgoprojArgoRolloutsPkgApisRolloutsV1alpha1TemplateServicePortMapping
+ */
+export interface GithubComArgoprojArgoRolloutsPkgApisRolloutsV1alpha1TemplateServicePortMapping {
+    /**
+     * 
+     * @type {number}
+     * @memberof GithubComArgoprojArgoRolloutsPkgApisRolloutsV1alpha1TemplateServicePortMapping
+     */
+    port?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GithubComArgoprojArgoRolloutsPkgApisRolloutsV1alpha1TemplateServicePortMapping
+     */
+    containerPort?: number;
 }
 /**
  * 

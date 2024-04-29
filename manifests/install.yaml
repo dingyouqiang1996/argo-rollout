@@ -9795,6 +9795,17 @@ spec:
                       properties:
                         name:
                           type: string
+                        portMappings:
+                          items:
+                            properties:
+                              containerPort:
+                                format: int32
+                                type: integer
+                              port:
+                                format: int32
+                                type: integer
+                            type: object
+                          type: array
                       type: object
                     template:
                       properties:
@@ -13130,6 +13141,17 @@ spec:
                                         properties:
                                           name:
                                             type: string
+                                          portMappings:
+                                            items:
+                                              properties:
+                                                containerPort:
+                                                  format: int32
+                                                  type: integer
+                                                port:
+                                                  format: int32
+                                                  type: integer
+                                              type: object
+                                            type: array
                                         type: object
                                       specRef:
                                         type: string
