@@ -286,25 +286,10 @@ func (ec *experimentContext) createTemplateService(template *v1alpha1.TemplateSp
 	// Create service with has same name, podTemplateHash, and labels as RS
 	podTemplateHash := rs.Labels[v1alpha1.DefaultRolloutUniqueLabelKey]
 	svc := ec.templateServices[template.Name]
-	var ports []corev1.ServicePort
-	for _, ctr := range rs.Spec.Template.Spec.Containers {
-		for _, port := range ctr.Ports {
-			servicePort := corev1.ServicePort{
-				Protocol:   port.Protocol,
-				Port:       port.ContainerPort,
-				TargetPort: intstr.FromInt(int(port.ContainerPort)),
-			}
-			if port.Name != "" {
-				servicePort.Name = port.Name
-			}
-			ports = append(ports, servicePort)
-		}
-	}
-	if (svc == nil || svc.Name != rs.Name) && len(ports) > 0 {
-		serviceName := rs.Name
-		if template.Service.Name != "" {
-			serviceName = template.Service.Name
-		}
+	ports := getPortsFromReplicaSet(rs, template)
+
+	if shouldCreateService(svc, rs, ports) {
+		serviceName := getServiceName(rs, template)
 		newService, err := ec.CreateService(serviceName, *template, rs.Labels, ports)
 		if err != nil {
 			templateStatus.Status = v1alpha1.TemplateStatusError
@@ -315,6 +300,47 @@ func (ec *experimentContext) createTemplateService(template *v1alpha1.TemplateSp
 			templateStatus.PodTemplateHash = podTemplateHash
 		}
 	}
+}
+
+func getPortsFromReplicaSet(rs *appsv1.ReplicaSet, template *v1alpha1.TemplateSpec) []corev1.ServicePort {
+	var ports []corev1.ServicePort
+	for _, ctr := range rs.Spec.Template.Spec.Containers {
+		for _, port := range ctr.Ports {
+			mappedPort := getMappedPort(port, template)
+			servicePort := corev1.ServicePort{
+				Protocol:   port.Protocol,
+				Port:       mappedPort,
+				TargetPort: intstr.FromInt(int(port.ContainerPort)),
+			}
+			if port.Name != "" {
+				servicePort.Name = port.Name
+			}
+			ports = append(ports, servicePort)
+		}
+	}
+	return ports
+}
+
+func getMappedPort(port corev1.ContainerPort, template *v1alpha1.TemplateSpec) int32 {
+	if template.Service.PortMappings != nil {
+		for _, portMapping := range template.Service.PortMappings {
+			if port.ContainerPort == portMapping.ContainerPort {
+				return portMapping.Port
+			}
+		}
+	}
+	return port.ContainerPort
+}
+
+func shouldCreateService(svc *corev1.Service, rs *appsv1.ReplicaSet, ports []corev1.ServicePort) bool {
+	return (svc == nil || svc.Name != rs.Name) && len(ports) > 0
+}
+
+func getServiceName(rs *appsv1.ReplicaSet, template *v1alpha1.TemplateSpec) string {
+	if template.Service.Name != "" {
+		return template.Service.Name
+	}
+	return rs.Name
 }
 
 // createReplicaSetForTemplate initializes ReplicaSet with zero replicas for given experiment template
