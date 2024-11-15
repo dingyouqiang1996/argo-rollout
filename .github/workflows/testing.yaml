@@ -184,7 +184,7 @@ jobs:
         run: |
           go tool covdata textfmt -i=coverage-output-unit/,coverage-output-e2e/ -o full-coverage.out
       - name: Upload code coverage information to codecov.io
-        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v4.5.0
+        uses: codecov/codecov-action@5c47607acb93fed5485fdbf7232e8a31425f672a # v5.0.2
         with:
           file: full-coverage.out
           fail_ci_if_error: false
